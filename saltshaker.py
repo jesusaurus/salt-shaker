@@ -26,6 +26,11 @@ op.add_option('-t', '--target', dest='target', type=str,
               default='*', help='Minion target')
 op.add_option('-e', '--environment', dest='env', type=str,
               default='base', help='Target environment')
+op.add_option('-i', '--id', dest='default_id', type=str,
+              default='salt-minion', help='Default minion id to use')
+op.add_option('-I', '--id-map', dest='mapfile', type=str,
+              default='id.map', help='File containing a mapping from states '
+              'to arbitrary id strings.')
 options, args = op.parse_args()
 
 if options.log_level.upper() in ['DEBUG', 'INFO', 'WARNING', 'ERROR',
@@ -62,6 +67,10 @@ cachedir: {3}/cache
 logger.debug("Config file:\n" + config)
 conffile.write(config)
 conffile.close()
+
+id_map = {}
+if os.path.isfile(options.mapfile):
+    id_map = yaml.safe_load(options.mapfile)
 
 with open(os.path.join(options.state, "top.sls")) as _top_file:
     state_top = yaml.safe_load(_top_file)
