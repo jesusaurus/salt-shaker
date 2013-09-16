@@ -15,9 +15,10 @@ logging.basicConfig(format='%(asctime)s\t%(name)-16s %(levelname)-8s %(message)s
 logger = logging.getLogger('saltshaker')
 logger.setLevel(logging.INFO)
 
+log_levels = ['debug', 'info', 'warning', 'error', 'critical']
 
 op = optparse.OptionParser()
-op.add_option('-l', '--log-level', dest='log_level', type=str,
+op.add_option('-l', '--log-level', dest='log_level', choices=log_levels,
               default='info', help='Logging output level.')
 op.add_option('-s', '--state-dir', dest='state', type=str,
               default='/srv/salt/', help='The state location')
@@ -36,9 +37,7 @@ op.add_option('-S', '--sudo', dest='sudo', action='store_true',
               default=False, help='Prefix salt-call command with "sudo"')
 options, args = op.parse_args()
 
-if options.log_level.upper() in ['DEBUG', 'INFO', 'WARNING', 'ERROR',
-                                 'CRITICAL']:
-    logger.setLevel(getattr(logging, options.log_level.upper()))
+logger.setLevel(getattr(logging, options.log_level.upper()))
 
 
 # create config file with given state/pillar dir
