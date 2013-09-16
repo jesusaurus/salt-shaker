@@ -32,6 +32,8 @@ op.add_option('-i', '--id', dest='default_id', type=str,
 op.add_option('-I', '--id-map', dest='mapfile', type=str,
               default='id.map', help='File containing a mapping from states '
               'to arbitrary id strings.')
+op.add_option('-S', '--sudo', dest='sudo', action='store_true',
+              default=False, help='Prefix salt-call command with "sudo"')
 options, args = op.parse_args()
 
 if options.log_level.upper() in ['DEBUG', 'INFO', 'WARNING', 'ERROR',
@@ -98,6 +100,9 @@ with open(os.path.join(options.state, "top.sls")) as _top_file:
                             'env={0}'.format(env),
                             'test=True',
                     ]
+                    if options.sudo:
+                        command.insert(0, 'sudo')
+
                     logger.info(' '.join(command))
 
                     proc = subprocess.Popen(
