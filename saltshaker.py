@@ -5,6 +5,7 @@
 import logging
 import optparse
 import os
+import shutil
 import tempfile
 import yaml
 
@@ -37,6 +38,9 @@ tempdir = tempfile.mkdtemp()
 conffile = open(os.path.join(tempdir, 'minion'), 'w')
 
 config = '''
+state_verbose: False
+state_output: full
+
 file_client: local
 file_roots:
   {0}:
@@ -51,6 +55,7 @@ pillar_roots:
 
 logger.debug("Config file:\n" + config)
 conffile.write(config)
+conffile.close()
 
 with open(options.state + "top.sls") as _top_file:
     state_top = yaml.safe_load(_top_file)
@@ -68,3 +73,5 @@ with open(options.state + "top.sls") as _top_file:
                             env
                         )
                 )
+
+shutil.rmtree(tempdir)
