@@ -36,6 +36,8 @@ if options.log_level.upper() in ['DEBUG', 'INFO', 'WARNING', 'ERROR',
 # create config file with given state/pillar dir
 tempdir = tempfile.mkdtemp()
 conffile = open(os.path.join(tempdir, 'minion'), 'w')
+os.makedirs(os.path.join(tempdir, 'cache'))
+os.makedirs(os.path.join(tempdir, 'pki', 'minion'))
 
 config = '''
 state_verbose: False
@@ -48,16 +50,20 @@ file_roots:
 pillar_roots:
   {0}:
     - {2}
+
+pki_dir: {3}/pki/minion
+cachedir: {3}/cache
 '''.format(options.env,
         os.path.abspath(options.state),
-        os.path.abspath(options.pillar)
+        os.path.abspath(options.pillar),
+        tempdir,
     )
 
 logger.debug("Config file:\n" + config)
 conffile.write(config)
 conffile.close()
 
-with open(options.state + "top.sls") as _top_file:
+with open(os.path.join(options.state, "top.sls")) as _top_file:
     state_top = yaml.safe_load(_top_file)
 
     for env, mapping in state_top.iteritems():
