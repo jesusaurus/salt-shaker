@@ -6,6 +6,7 @@ import logging
 import optparse
 import os
 import shutil
+import subprocess
 import tempfile
 import yaml
 
@@ -78,15 +79,34 @@ with open(os.path.join(options.state, "top.sls")) as _top_file:
     for env, mapping in state_top.iteritems():
         for target, states in mapping.iteritems():
             for state in states:
-                logger.info(
-                        # TODO: match against needed pillar for each state
-                        # maybe by setting the id to the target?
-                        "salt-call --local --config-dir {0} "
-                        "state.sls {1} env={2} test=True".format(
-                            tempdir,
-                            state,
-                            env
-                        )
-                )
+                if state in id_map:
+                    if isinstance(id_map[state], list):
+                        ids = id_map[state]
+                    else:
+                        ids = [ id_map[state], ]
+                else:
+                    ids = [ options.default_id, ]
+                for minion_id in ids:
+                    command = [
+                            'salt-call',
+                            '--local',
+                            '--log-level', options.log_level,
+                            '--log-file', './shaker.log',
+                            '--config-dir', tempdir,
+                            '--id', minion_id,
+                            'state.sls', state,
+                            'env={0}'.format(env),
+                            'test=True',
+                    ]
+                    logger.info(' '.join(command))
+
+                    proc = subprocess.Popen(
+                            command,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                    )
+                    (out, err) = proc.communicate()
+                    logger.warning(out)
+                    logger.error(err)
 
 shutil.rmtree(tempdir)
