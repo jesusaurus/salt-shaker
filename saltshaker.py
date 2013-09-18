@@ -54,6 +54,8 @@ op.add_option('-I', '--id-map', dest='mapfile', type=str,
               'to arbitrary id strings.')
 op.add_option('-n', '--test', '--dry-run', '--no', dest='test', action='store_true',
               default=False, help='Don\'t actually run any commands')
+op.add_option('-L', '--log-file', dest='log_file', type=str,
+              default='/tmp/saltshaker.log', help='The log file location')
 options, args = op.parse_args()
 
 logger.setLevel(getattr(logging, options.log_level.upper()))
@@ -92,7 +94,7 @@ log_file: {5}
         os.path.abspath(options.pillar),
         tempdir,
         options.log_level,
-        'salt-shaker.log',
+        os.path.abspath(options.log_file),
     )
 
 logger.debug("Config file:\n" + config)
