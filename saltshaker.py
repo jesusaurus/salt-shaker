@@ -21,6 +21,7 @@
 import logging
 import optparse
 import os
+import salt.client
 import shutil
 import subprocess
 import tempfile
@@ -49,11 +50,14 @@ op.add_option('-i', '--id', dest='default_id', type=str,
 op.add_option('-I', '--id-map', dest='mapfile', type=str,
               default='id.map', help='File containing a mapping from states '
               'to arbitrary id strings.')
-op.add_option('-S', '--sudo', dest='sudo', action='store_true',
-              default=False, help='Prefix salt-call command with "sudo"')
+op.add_option('-n', '--test', '--dry-run', '--no', dest='test', action='store_true',
+              default=False, help='Don\'t actually run any commands')
 options, args = op.parse_args()
 
 logger.setLevel(getattr(logging, options.log_level.upper()))
+
+salt_log = logging.getLogger('salt')
+salt_log.setLevel(options.log_level.upper())
 
 
 # create config file with given state/pillar dir
@@ -111,29 +115,11 @@ with open(os.path.join(options.state, "top.sls")) as _top_file:
                 else:
                     ids = [ options.default_id, ]
                 for minion_id in ids:
-                    command = [
-                            'salt-call',
-                            '--local',
-                            '--log-level', options.log_level,
-                            '--log-file', './shaker.log',
-                            '--config-dir', tempdir,
-                            '--id', minion_id,
-                            'state.sls', state,
-                            'env={0}'.format(env),
-                            'test=True',
-                    ]
-                    if options.sudo:
-                        command.insert(0, 'sudo')
+                    salt_call = salt.client.Caller(c_path=os.path.join(tempdir, 'minion'))
+                    salt_call.opts['id'] = minion_id
+                    logger.info('Testing state {0} with minion id {1}'.format(state, minion_id))
+                    if not options.test:
+                        salt_call.function('state.sls', state, test=True)
 
-                    logger.info(' '.join(command))
-
-                    proc = subprocess.Popen(
-                            command,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                    )
-                    (out, err) = proc.communicate()
-                    logger.warning(out)
-                    logger.error(err)
-
+logger.info('Removing tempdir')
 shutil.rmtree(tempdir)
