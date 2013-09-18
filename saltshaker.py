@@ -41,8 +41,6 @@ op.add_option('-s', '--state-dir', dest='state', type=str,
               default='/srv/salt/', help='The state location')
 op.add_option('-p', '--pillar-dir', dest='pillar', type=str,
               default='/srv/pillar', help='The pillar location')
-op.add_option('-t', '--target', dest='target', type=str,
-              default='*', help='Minion target')
 op.add_option('-e', '--environment', dest='env', type=str,
               default='base', help='Target environment')
 op.add_option('-i', '--id', dest='default_id', type=str,
@@ -107,6 +105,9 @@ with open(os.path.join(options.state, "top.sls")) as _top_file:
     state_top = yaml.safe_load(_top_file)
 
     for env, mapping in state_top.iteritems():
+        if env != options.env:
+            continue
+
         for target, states in mapping.iteritems():
             for state in states:
                 if state in id_map:
@@ -119,9 +120,10 @@ with open(os.path.join(options.state, "top.sls")) as _top_file:
                 for minion_id in ids:
                     salt_call = salt.client.Caller(c_path=os.path.join(tempdir, 'minion'))
                     salt_call.opts['id'] = minion_id
-                    logger.info('Testing state {0} with minion id {1}'.format(state, minion_id))
+                    logger.info('Testing state {0} with minion id {1} and '
+                                'environment {2}'.format(state, minion_id, env))
                     if not options.test:
-                        salt_call.function('state.sls', state, test=True)
+                        salt_call.function('state.sls', state, env=env, test=True)
 
 logger.info('Removing tempdir')
 shutil.rmtree(tempdir)
