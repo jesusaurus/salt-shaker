@@ -63,6 +63,7 @@ os.makedirs(os.path.join(tempdir, 'cache'))
 os.makedirs(os.path.join(tempdir, 'pki', 'minion'))
 
 config = '''
+test: True
 state_verbose: False
 state_output: full
 
@@ -76,10 +77,16 @@ pillar_roots:
 
 pki_dir: {3}/pki/minion
 cachedir: {3}/cache
+
+log_level: {4}
+log_level_logfile: {4}
+log_file: {5}
 '''.format(options.env,
         os.path.abspath(options.state),
         os.path.abspath(options.pillar),
         tempdir,
+        options.log_level,
+        'salt-shaker.log',
     )
 
 logger.debug("Config file:\n" + config)
