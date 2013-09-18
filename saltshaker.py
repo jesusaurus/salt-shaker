@@ -124,11 +124,12 @@ with open(os.path.join(options.state, "top.sls")) as _top_file:
                 else:
                     ids = [ options.default_id, ]
                 for minion_id in ids:
+                    logger.info('Prepping salt minion id {0}'.format(minion_id, env))
                     salt_call = salt.client.Caller(c_path=os.path.join(tempdir, 'minion'))
                     salt_call.opts['id'] = minion_id
-                    logger.info('Testing state {0} with minion id {1} and '
-                                'environment {2}'.format(state, minion_id, env))
                     if not options.test:
+                        logger.warning('Testing state {0} with minion id {1} and '
+                                       'environment {2}'.format(state, minion_id, env))
                         salt_call.function('state.sls', state, env=env, test=True)
 
 logger.info('Removing tempdir')
