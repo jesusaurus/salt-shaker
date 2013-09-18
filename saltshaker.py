@@ -18,7 +18,15 @@
 
 # Give salt the shakedown
 
+
+# Don't let other modules highjack the logging
+# I'm looking at you, salt.client
 import logging
+logging.basicConfig(format='%(asctime)s\t%(name)-16s %(levelname)-8s %(message)s')
+logger = logging.getLogger('saltshaker')
+logger.setLevel(logging.INFO)
+
+
 import optparse
 import os
 import salt.client
@@ -27,10 +35,6 @@ import subprocess
 import tempfile
 import yaml
 
-
-logging.basicConfig(format='%(asctime)s\t%(name)-16s %(levelname)-8s %(message)s')
-logger = logging.getLogger('saltshaker')
-logger.setLevel(logging.INFO)
 
 log_levels = ['debug', 'info', 'warning', 'error', 'critical']
 
@@ -101,6 +105,8 @@ if os.path.isfile(options.mapfile):
         id_map = yaml.safe_load(mapfile)
     logger.debug("ID map:\n" + yaml.safe_dump(id_map))
 
+
+# Here's where we do the actual work
 with open(os.path.join(options.state, "top.sls")) as _top_file:
     state_top = yaml.safe_load(_top_file)
 
