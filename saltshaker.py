@@ -99,7 +99,9 @@ conffile.close()
 
 id_map = {}
 if os.path.isfile(options.mapfile):
-    id_map = yaml.safe_load(options.mapfile)
+    with open(options.mapfile, 'r') as mapfile:
+        id_map = yaml.safe_load(mapfile)
+    logger.debug("ID map:\n" + yaml.safe_dump(id_map))
 
 with open(os.path.join(options.state, "top.sls")) as _top_file:
     state_top = yaml.safe_load(_top_file)
