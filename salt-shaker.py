@@ -45,7 +45,7 @@ op = optparse.OptionParser()
 op.add_option('-l', '--log-level', dest='log_level', choices=log_levels,
               default='info', help='Logging output level for salt-shaker.')
 op.add_option('-L', '--salt-log-level', dest='salt_log_level', choices=log_levels,
-              default='critical', help='Logging output level for salt core.')
+              default='error', help='Logging output level for salt core.')
 op.add_option('-s', '--state-dir', dest='state', type=str, action='append',
               default=['/srv/salt/'], help='The state location(s), '
               'can be specified multiple times.')
