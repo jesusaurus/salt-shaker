@@ -43,7 +43,9 @@ log_levels = ['debug', 'info', 'warning', 'error', 'critical']
 
 op = optparse.OptionParser()
 op.add_option('-l', '--log-level', dest='log_level', choices=log_levels,
-              default='info', help='Logging output level.')
+              default='info', help='Logging output level for salt-shaker.')
+op.add_option('-L', '--salt-log-level', dest='salt_log_level', choices=log_levels,
+              default='critical', help='Logging output level for salt core.')
 op.add_option('-s', '--state-dir', dest='state', type=str, action='append',
               default=['/srv/salt/'], help='The state location(s), '
               'can be specified multiple times.')
@@ -59,14 +61,14 @@ op.add_option('-I', '--id-map', dest='mapfile', type=str,
               'to arbitrary id strings.')
 op.add_option('-n', '--test', '--dry-run', '--no', dest='test', action='store_true',
               default=False, help='Don\'t actually run any commands')
-op.add_option('-L', '--log-file', dest='log_file', type=str,
+op.add_option('-f', '--log-file', dest='log_file', type=str,
               default='/tmp/saltshaker.log', help='The log file location')
 options, args = op.parse_args()
 
 logger.setLevel(getattr(logging, options.log_level.upper()))
 
 salt_log = logging.getLogger('salt')
-salt_log.setLevel(options.log_level.upper())
+salt_log.setLevel(options.salt_log_level.upper())
 
 
 # create a tempdir to run from
@@ -87,8 +89,8 @@ opts.update({
     'pillar_opts': False,
     'pki_dir': os.path.join(tempdir, 'pki', 'minion'),
     'cachedir': os.path.join(tempdir, 'cache'),
-    'log_level': options.log_level,
-    'log_level_logfile': options.log_level,
+    'log_level': options.salt_log_level,
+    'log_level_logfile': options.salt_log_level,
     'log_file': os.path.abspath(options.log_file),
     'extension_modules': os.path.join(tempdir, 'extmods'),
 })
