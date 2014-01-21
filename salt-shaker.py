@@ -143,5 +143,7 @@ if state_list:
 else:
     logger.warning('No states found')
 
+
+# Clean up the tempdir
 logger.info('Removing tempdir')
 shutil.rmtree(tempdir)
